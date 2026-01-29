@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Bot Management</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-bg: #0f0f0f;
+            --secondary-bg: #1a1a1a;
+            --tertiary-bg: #242424;
+            --discord-purple: #5865f2;
+            --discord-purple-dark: #4752c4;
+            --accent-blue: #00aff4;
+            --text-primary: #f5f5f5;
+            --text-secondary: #b0b0b0;
+            --text-muted: #7a7a7a;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #31a24c;
+            --error: #ed4245;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(90deg, #1a1a1a, #242424);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-decoration: none;
+            letter-spacing: 2px;
+        }
+
+        .user-badge {
+            background: rgba(88, 101, 242, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--accent-blue);
+            border: 1px solid rgba(88, 101, 242, 0.3);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-logout {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--discord-purple), var(--discord-purple-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(88, 101, 242, 0.3);
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* ===== STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.1), rgba(0, 175, 244, 0.05));
+            border: 1px solid rgba(88, 101, 242, 0.15);
+            padding: 24px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--discord-purple);
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.15), rgba(0, 175, 244, 0.1));
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(88, 101, 242, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--discord-purple);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            color: var(--success);
+        }
+
+        /* ===== SECTION HEADER ===== */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--discord-purple), var(--discord-purple-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(88, 101, 242, 0.3);
+        }
+
+        /* ===== TABLES ===== */
+        .table-section {
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.04), rgba(0, 175, 244, 0.02));
+            border: 1px solid rgba(88, 101, 242, 0.12);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(88, 101, 242, 0.1);
+            border-bottom: 1px solid rgba(88, 101, 242, 0.15);
+        }
+
+        th {
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(88, 101, 242, 0.08);
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: rgba(88, 101, 242, 0.05);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-online {
+            background: rgba(49, 162, 76, 0.2);
+            color: var(--success);
+        }
+
+        .status-offline {
+            background: rgba(128, 132, 142, 0.2);
+            color: #80848e;
+        }
+
+        .status-idle {
+            background: rgba(240, 178, 50, 0.2);
+            color: #f0b232;
+        }
+
+        .action-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(88, 101, 242, 0.2);
+            color: var(--discord-purple);
+        }
+
+        /* ===== MODALS ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(36, 36, 66, 0.9));
+            border: 1px solid rgba(88, 101, 242, 0.2);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(88, 101, 242, 0.2);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: rgba(88, 101, 242, 0.15);
+            border-color: var(--discord-purple);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--discord-purple), var(--discord-purple-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(88, 101, 242, 0.3);
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: 1px solid rgba(88, 101, 242, 0.4);
+            color: var(--accent-blue);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(88, 101, 242, 0.15);
+            border-color: var(--discord-purple);
+        }
+
+        /* ===== ALERTS ===== */
+        .alert {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            animation: slideDown 0.3s ease-out;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: rgba(49, 162, 76, 0.15);
+            border: 1px solid rgba(49, 162, 76, 0.3);
+            color: #6fff85;
+        }
+
+        .alert-error {
+            background: rgba(237, 66, 69, 0.15);
+            border: 1px solid rgba(237, 66, 69, 0.3);
+            color: #ff9999;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            header {
+                padding: 16px 20px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 12px;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-left">
+        <a href="index.html" class="logo">DASHBOARD</a>
+        <div class="user-badge">
+            <i class="fa-solid fa-user-circle"></i>
+            <span id="userName" style="margin-left: 8px;">User</span>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="btn-logout" onclick="logout()">
+            <i class="fa-solid fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+    <div id="alertContainer"></div>
+
+    <!-- STATS SECTION -->
+    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">Dashboard Overview</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Total Members</div>
+            <div class="stat-value" id="totalMembers">0</div>
+            <div class="stat-change" id="membersChange">+0% this week</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Active Users</div>
+            <div class="stat-value" id="activeUsers">0</div>
+            <div class="stat-change" id="activeChange">+0% online</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💬</div>
+            <div class="stat-label">Messages Today</div>
+            <div class="stat-value" id="messagesCount">0</div>
+            <div class="stat-change" id="messagesChange">+0% from yesterday</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⚙️</div>
+            <div class="stat-label">Bot Status</div>
+            <div class="stat-value" id="botStatus">Online</div>
+            <div class="stat-change" id="uptime">100% uptime</div>
+        </div>
+    </div>
+
+    <!-- MEMBERS SECTION -->
+    <div style="margin-top: 50px;">
+        <div class="section-header">
+            <h3 class="section-title">Members</h3>
+            <button class="btn-primary" onclick="openAddMemberModal()">
+                <i class="fa-solid fa-plus"></i> Add Member
+            </button>
+        </div>
+        <div class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Messages</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="membersList">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- WARNINGS SECTION -->
+    <div style="margin-top: 50px;">
+        <div class="section-header">
+            <h3 class="section-title">Recent Warnings</h3>
+            <button class="btn-primary" onclick="openAddWarningModal()">
+                <i class="fa-solid fa-exclamation-triangle"></i> Add Warning
+            </button>
+        </div>
+        <div class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Reason</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="warningsList">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ADD MEMBER MODAL -->
+<div id="memberModal" class="modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Add New Member</h3>
+        <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" id="memberUsername" class="form-input" placeholder="username#0000">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Status</label>
+            <select id="memberStatus" class="form-input" style="cursor: pointer;">
+                <option value="online">Online</option>
+                <option value="idle">Idle</option>
+                <option value="offline">Offline</option>
+            </select>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn-submit" onclick="addMember()">Add Member</button>
+            <button class="btn-cancel" onclick="closeModal('memberModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ADD WARNING MODAL -->
+<div id="warningModal" class="modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Add Warning</h3>
+        <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" id="warningUsername" class="form-input" placeholder="username#0000">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Reason</label>
+            <input type="text" id="warningReason" class="form-input" placeholder="e.g., Spam messages">
+        </div>
+        <div class="modal-buttons">
+            <button class="btn-submit" onclick="addWarning()">Add Warning</button>
+            <button class="btn-cancel" onclick="closeModal('warningModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Data Management
+    const dashboardData = {
+        members: [],
+        warnings: [],
+        stats: {
+            totalMembers: 0,
+            activeUsers: 0,
+            messagesCount: 0,
+            botStatus: 'Online'
+        }
+    };
+
+    // Initialize
+    window.addEventListener('load', () => {
+        loadUserData();
+        loadDashboardData();
+        updateStats();
+        renderMembers();
+        renderWarnings();
+        startAutoUpdate();
+    });
+
+    // Load user from localStorage
+    function loadUserData() {
+        const userName = localStorage.getItem('userName') || 'Admin User';
+        document.getElementById('userName').textContent = userName;
+    }
+
+    // Load dashboard data from localStorage
+    function loadDashboardData() {
+        const saved = localStorage.getItem('dashboardData');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            dashboardData.members = parsed.members || [];
+            dashboardData.warnings = parsed.warnings || [];
+        } else {
+            // Initialize with demo data
+            dashboardData.members = [
+                { id: 1, username: 'ShadowNinja#0001', status: 'online', joined: '2 hours ago', messages: 284 },
+                { id: 2, username: 'CrimsonFox#2847', status: 'online', joined: '1 day ago', messages: 1523 },
+                { id: 3, username: 'EchoVortex#5192', status: 'idle', joined: '3 days ago', messages: 847 }
+            ];
+            dashboardData.warnings = [
+                { id: 1, username: 'SpammerBot#1234', reason: 'Spam messages', date: 'Today at 2:34 PM', status: 'closed' },
+                { id: 2, username: 'ToxicUser#5678', reason: 'Offensive language', date: 'Today at 1:15 PM', status: 'pending' }
+            ];
+        }
+    }
+
+    // Update stats
+    function updateStats() {
+        const activeCount = dashboardData.members.filter(m => m.status === 'online').length;
+        const totalMessages = dashboardData.members.reduce((sum, m) => sum + m.messages, 0);
+
+        dashboardData.stats.totalMembers = dashboardData.members.length;
+        dashboardData.stats.activeUsers = activeCount;
+        dashboardData.stats.messagesCount = totalMessages;
+
+        document.getElementById('totalMembers').textContent = dashboardData.stats.totalMembers;
+        document.getElementById('membersChange').textContent = '+' + Math.floor(Math.random() * 20) + '% this week';
+
+        document.getElementById('activeUsers').textContent = dashboardData.stats.activeUsers;
+        document.getElementById('activeChange').textContent = '+' + activeCount + ' online';
+
+        document.getElementById('messagesCount').textContent = totalMessages;
+        document.getElementById('messagesChange').textContent = '+' + Math.floor(Math.random() * 30) + '% from yesterday';
+
+        document.getElementById('botStatus').textContent = 'Online';
+        document.getElementById('uptime').textContent = '99.' + Math.floor(Math.random() * 100) + '% uptime';
+    }
+
+    // Render members table
+    function renderMembers() {
+        const tbody = document.getElementById('membersList');
+        tbody.innerHTML = dashboardData.members.map(member => `
+            <tr>
+                <td><strong>${member.username}</strong></td>
+                <td><span class="status-badge status-${member.status}">${member.status}</span></td>
+                <td>${member.joined}</td>
+                <td>${member.messages}</td>
+                <td>
+                    <div class="action-menu">
+                        <button class="action-btn" title="Edit" onclick="editMember(${member.id})">
+                            <i class="fa-solid fa-edit"></i>
+                        </button>
+                        <button class="action-btn" title="Remove" onclick="removeMember(${member.id})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Render warnings table
+    function renderWarnings() {
+        const tbody = document.getElementById('warningsList');
+        tbody.innerHTML = dashboardData.warnings.map(warning => `
+            <tr>
+                <td><strong>${warning.username}</strong></td>
+                <td>${warning.reason}</td>
+                <td>${warning.date}</td>
+                <td><span class="status-badge" style="background: ${warning.status === 'closed' ? 'rgba(128,132,142,0.2)' : 'rgba(240,178,50,0.2)'}; color: ${warning.status === 'closed' ? '#80848e' : '#f0b232'};">${warning.status}</span></td>
+                <td>
+                    <div class="action-menu">
+                        <button class="action-btn" title="Remove" onclick="removeWarning(${warning.id})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Add member
+    function addMember() {
+        const username = document.getElementById('memberUsername').value.trim();
+        const status = document.getElementById('memberStatus').value;
+
+        if (!username) {
+            showAlert('Please enter a username', 'error');
+            return;
+        }
+
+        const newMember = {
+            id: Math.max(...dashboardData.members.map(m => m.id), 0) + 1,
+            username: username,
+            status: status,
+            joined: 'Just now',
+            messages: 0
+        };
+
+        dashboardData.members.push(newMember);
+        saveDashboardData();
+        updateStats();
+        renderMembers();
+        closeModal('memberModal');
+        showAlert('Member added successfully!', 'success');
+
+        document.getElementById('memberUsername').value = '';
+        document.getElementById('memberStatus').value = 'online';
+    }
+
+    // Remove member
+    function removeMember(id) {
+        if (confirm('Are you sure you want to remove this member?')) {
+            dashboardData.members = dashboardData.members.filter(m => m.id !== id);
+            saveDashboardData();
+            updateStats();
+            renderMembers();
+            showAlert('Member removed successfully!', 'success');
+        }
+    }
+
+    // Add warning
+    function addWarning() {
+        const username = document.getElementById('warningUsername').value.trim();
+        const reason = document.getElementById('warningReason').value.trim();
+
+        if (!username || !reason) {
+            showAlert('Please fill in all fields', 'error');
+            return;
+        }
+
+        const newWarning = {
+            id: Math.max(...dashboardData.warnings.map(w => w.id), 0) + 1,
+            username: username,
+            reason: reason,
+            date: new Date().toLocaleString(),
+            status: 'pending'
+        };
+
+        dashboardData.warnings.push(newWarning);
+        saveDashboardData();
+        renderWarnings();
+        closeModal('warningModal');
+        showAlert('Warning added successfully!', 'success');
+
+        document.getElementById('warningUsername').value = '';
+        document.getElementById('warningReason').value = '';
+    }
+
+    // Remove warning
+    function removeWarning(id) {
+        if (confirm('Are you sure you want to remove this warning?')) {
+            dashboardData.warnings = dashboardData.warnings.filter(w => w.id !== id);
+            saveDashboardData();
+            renderWarnings();
+            showAlert('Warning removed successfully!', 'success');
+        }
+    }
+
+    // Save data to localStorage
+    function saveDashboardData() {
+        localStorage.setItem('dashboardData', JSON.stringify({
+            members: dashboardData.members,
+            warnings: dashboardData.warnings
+        }));
+    }
+
+    // Modal functions
+    function openAddMemberModal() {
+        document.getElementById('memberModal').classList.add('active');
+    }
+
+    function openAddWarningModal() {
+        document.getElementById('warningModal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Close modal on background click
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+    });
+
+    // Show alerts
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} show`;
+        alert.textContent = message;
+        alertContainer.appendChild(alert);
+
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    }
+
+    // Logout
+    function logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem('userName');
+            localStorage.removeItem('dashboardData');
+            window.location.href = 'login.html';
+        }
+    }
+
+    // Auto-update stats every 30 seconds
+    function startAutoUpdate() {
+        setInterval(() => {
+            // Simulate random message increase
+            dashboardData.members.forEach(member => {
+                member.messages += Math.floor(Math.random() * 10);
+            });
+            updateStats();
+            renderMembers();
+            saveDashboardData();
+        }, 30000);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(m => {
+                m.classList.remove('active');
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
